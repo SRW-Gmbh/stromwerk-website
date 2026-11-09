@@ -6,28 +6,19 @@
   <title>Referenzen – STROMWERK | SRW Solarenergie GmbH</title>
   <meta name="description" content="19 realisierte Energieprojekte in Österreich.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <style>
     .map-section{background:var(--navy-800);padding:0 0 4rem}
     .map-section .section-header{padding:4rem 0 2rem}
     .map-section .section-label{color:var(--green)}
     .map-section h2{color:#0f172a}
     .map-section p{color:var(--text-muted)}
-    #ref-map{height:480px;width:100%;border-radius:var(--radius);border:1px solid rgba(255,255,255,.08);overflow:hidden}
-    .leaflet-container{background:#1a1a2e!important}
-    .map-pin{width:14px;height:14px;border-radius:50%;background:#22d353;border:2px solid #fff;box-shadow:0 0 0 0 rgba(34,211,83,.6);animation:pin-pulse 2.2s infinite}
-    @keyframes pin-pulse{0%{box-shadow:0 0 0 0 rgba(34,211,83,.6)}70%{box-shadow:0 0 0 10px rgba(34,211,83,0)}100%{box-shadow:0 0 0 0 rgba(34,211,83,0)}}
-    .leaflet-popup-content-wrapper{background:#1a2f4a!important;border:1px solid rgba(34,211,83,.2)!important;border-radius:8px!important;box-shadow:0 8px 32px rgba(0,0,0,.4)!important;color:#fff!important}
-    .leaflet-popup-tip{background:#1a2f4a!important}
-    .leaflet-popup-content{margin:12px 16px!important;font-size:.85rem}
-    .leaflet-popup-content strong{color:#fff;font-size:.9rem}
-    .leaflet-popup-content span{color:#9ab0c8;display:block;margin-top:2px}
-    .pop-cat{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
-    .pop-cat.shell{background:rgba(34,211,83,.15);color:#22d353;border:1px solid rgba(34,211,83,.3)}
-    .pop-cat.gewerbe{background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
-    .leaflet-control-attribution{background:rgba(6,15,30,.8)!important;color:#7a95b0!important}
-    .leaflet-control-attribution a{color:#60a5fa!important}
+    #ref-map{height:480px;width:100%;border-radius:var(--radius);border:1px solid rgba(255,255,255,.08);overflow:hidden;position:relative}
+    #map-tooltip{display:none;position:absolute;z-index:10;pointer-events:none;background:#1a2f4a;border:1px solid rgba(34,211,83,.2);border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.4);color:#fff;padding:10px 14px;min-width:155px}
+    #tt-title{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:2px}
+    #tt-loc{font-size:.78rem;color:#9ab0c8;margin-bottom:6px}
+    #tt-cat{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
+    #tt-cat.shell{background:rgba(34,211,83,.15);color:#22d353;border:1px solid rgba(34,211,83,.3)}
+    #tt-cat.gewerbe{background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
     .filter-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
     .filter-btn{padding:.45rem 1.2rem;border-radius:2rem;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-size:.82rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s}
     .filter-btn:hover{border-color:var(--green);color:#0f172a}
@@ -90,13 +81,7 @@
 <body>
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="logo">
-      <svg width="170" height="38" viewBox="0 0 170 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="16,1 7,19 13,19 4,37 22,14 16,14" fill="#22d353"/>
-        <text x="30" y="27" font-family="Inter,system-ui,sans-serif" font-weight="800" font-size="19" fill="#0f172a" letter-spacing="-0.5">STROM</text>
-        <text x="108" y="27" font-family="Inter,system-ui,sans-serif" font-weight="300" font-size="19" fill="#64748b" letter-spacing="1">WERK</text>
-      </svg>
-    </a>
+    <a href="index.html" class="logo"><img src="logos/stromwerk-logo-primary.png" height="42" alt="STROMWERK – SRW Solarenergie GmbH" style="display:block"></a>
     <ul class="nav-links">
       <li><a href="index.html">Startseite</a></li>
       <li><a href="leistungen.html">Leistungen</a></li>
@@ -139,7 +124,53 @@
       <h2>Unsere Projekte auf einen Blick</h2>
       <p>Klicken Sie auf einen Marker für Projektdetails.</p>
     </div>
-    <div id="ref-map"></div>
+    <div id="ref-map">
+      <svg id="austria-svg" viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" style="display:block;cursor:default">
+        <defs>
+          <radialGradient id="bg-grad" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#0d1a2e"/>
+            <stop offset="100%" stop-color="#060d1a"/>
+          </radialGradient>
+        </defs>
+        <rect width="760" height="380" fill="url(#bg-grad)"/>
+        <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+          <line x1="82" y1="0" x2="82" y2="380"/><line x1="171" y1="0" x2="171" y2="380"/><line x1="260" y1="0" x2="260" y2="380"/><line x1="349" y1="0" x2="349" y2="380"/><line x1="438" y1="0" x2="438" y2="380"/><line x1="526" y1="0" x2="526" y2="380"/><line x1="615" y1="0" x2="615" y2="380"/><line x1="704" y1="0" x2="704" y2="380"/>
+          <line x1="0" y1="32" x2="760" y2="32"/><line x1="0" y1="93" x2="760" y2="93"/><line x1="0" y1="154" x2="760" y2="154"/><line x1="0" y1="214" x2="760" y2="214"/><line x1="0" y1="275" x2="760" y2="275"/><line x1="0" y1="336" x2="760" y2="336"/>
+        </g>
+        <path d="M 40,212 L 57,203 L 69,202 L 82,192 L 126,188 L 171,183 L 216,173 L 260,158 L 304,141 L 349,122 L 393,90 L 420,84 L 438,81 L 482,75 L 527,50 L 571,30 L 598,38 L 616,59 L 660,56 L 696,81 L 719,154 L 704,185 L 687,202 L 660,191 L 616,196 L 571,275 L 527,318 L 482,345 L 438,343 L 393,328 L 349,333 L 304,314 L 260,267 L 216,275 L 171,303 L 127,293 L 100,275 L 82,250 L 57,224 Z" fill="#112040" stroke="#22d353" stroke-width="1.5" stroke-opacity="0.45" stroke-linejoin="round"/>
+        <g fill="#ffffff" fill-opacity="0.15" font-family="system-ui,sans-serif" font-size="9" letter-spacing="0.08em" text-anchor="middle" pointer-events="none">
+          <text x="62" y="230">VBG</text><text x="148" y="250">TIROL</text><text x="258" y="215">SBG</text><text x="425" y="197">OÖ</text><text x="558" y="176">NÖ</text><text x="650" y="143">WIEN</text><text x="693" y="193">BGLD</text><text x="508" y="265">STMK</text><text x="425" y="308">KTN</text>
+        </g>
+        <!-- Shell Tankstellen -->
+        <g class="dot-group" data-idx="0" style="cursor:pointer"><circle cx="420" cy="134" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="420" cy="134" r="4" fill="#22d353" data-idx="0"/></g>
+        <g class="dot-group" data-idx="1" style="cursor:pointer"><circle cx="460" cy="112" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.3s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="460" cy="112" r="4" fill="#22d353" data-idx="1"/></g>
+        <g class="dot-group" data-idx="2" style="cursor:pointer"><circle cx="435" cy="149" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.6s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.6s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="435" cy="149" r="4" fill="#22d353" data-idx="2"/></g>
+        <g class="dot-group" data-idx="3" style="cursor:pointer"><circle cx="468" cy="122" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.9s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.9s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="468" cy="122" r="4" fill="#22d353" data-idx="3"/></g>
+        <g class="dot-group" data-idx="4" style="cursor:pointer"><circle cx="406" cy="132" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.2s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.2s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="406" cy="132" r="4" fill="#22d353" data-idx="4"/></g>
+        <g class="dot-group" data-idx="5" style="cursor:pointer"><circle cx="581" cy="104" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.5s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.5s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="581" cy="104" r="4" fill="#22d353" data-idx="5"/></g>
+        <g class="dot-group" data-idx="6" style="cursor:pointer"><circle cx="480" cy="125" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.8s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="480" cy="125" r="4" fill="#22d353" data-idx="6"/></g>
+        <g class="dot-group" data-idx="7" style="cursor:pointer"><circle cx="492" cy="119" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="2.1s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="2.1s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="492" cy="119" r="4" fill="#22d353" data-idx="7"/></g>
+        <g class="dot-group" data-idx="8" style="cursor:pointer"><circle cx="546" cy="128" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="2.4s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="2.4s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="546" cy="128" r="4" fill="#22d353" data-idx="8"/></g>
+        <g class="dot-group" data-idx="9" style="cursor:pointer"><circle cx="437" cy="84" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.15s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.15s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="437" cy="84" r="4" fill="#22d353" data-idx="9"/></g>
+        <g class="dot-group" data-idx="10" style="cursor:pointer"><circle cx="659" cy="99" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.45s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.45s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="659" cy="99" r="4" fill="#22d353" data-idx="10"/></g>
+        <g class="dot-group" data-idx="11" style="cursor:pointer"><circle cx="418" cy="151" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.75s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.75s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="418" cy="151" r="4" fill="#22d353" data-idx="11"/></g>
+        <g class="dot-group" data-idx="12" style="cursor:pointer"><circle cx="649" cy="123" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.05s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.05s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="649" cy="123" r="4" fill="#22d353" data-idx="12"/></g>
+        <g class="dot-group" data-idx="13" style="cursor:pointer"><circle cx="642" cy="152" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.35s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.35s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="642" cy="152" r="4" fill="#22d353" data-idx="13"/></g>
+        <g class="dot-group" data-idx="14" style="cursor:pointer"><circle cx="459" cy="126" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.65s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.65s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="459" cy="126" r="4" fill="#22d353" data-idx="14"/></g>
+        <g class="dot-group" data-idx="15" style="cursor:pointer"><circle cx="488" cy="115" r="7" fill="#22d353" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.95s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.95s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="488" cy="115" r="4" fill="#22d353" data-idx="15"/></g>
+        <!-- Gewerbe & Industrie -->
+        <g class="dot-group" data-idx="16" style="cursor:pointer"><circle cx="443" cy="131" r="7" fill="#60a5fa" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="0.5s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="443" cy="131" r="4" fill="#60a5fa" data-idx="16"/></g>
+        <g class="dot-group" data-idx="17" style="cursor:pointer"><circle cx="486" cy="135" r="10" fill="#60a5fa" fill-opacity="0.15"><animate attributeName="r" values="10;20;10" dur="2.8s" begin="1.0s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.0s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="486" cy="135" r="6" fill="#60a5fa" data-idx="17"/><circle cx="486" cy="135" r="2.5" fill="#ffffff" fill-opacity="0.6" pointer-events="none"/></g>
+        <g class="dot-group" data-idx="18" style="cursor:pointer"><circle cx="437" cy="140" r="7" fill="#60a5fa" fill-opacity="0.15"><animate attributeName="r" values="7;15;7" dur="2.8s" begin="1.5s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.5;0;0.5" dur="2.8s" begin="1.5s" repeatCount="indefinite"/></circle><circle class="map-dot" cx="437" cy="140" r="4" fill="#60a5fa" data-idx="18"/></g>
+        <!-- Legend -->
+        <g transform="translate(20,354)" pointer-events="none">
+          <circle cx="6" cy="7" r="4" fill="#22d353"/><text x="16" y="11" fill="#9ab0c8" font-size="10" font-family="system-ui,sans-serif">Shell Tankstellen</text>
+          <circle cx="128" cy="7" r="4" fill="#60a5fa"/><text x="138" y="11" fill="#9ab0c8" font-size="10" font-family="system-ui,sans-serif">Gewerbe &amp; Industrie</text>
+          <circle cx="246" cy="7" r="6" fill="#60a5fa"/><circle cx="246" cy="7" r="2.5" fill="#ffffff" fill-opacity="0.6"/><text x="258" y="11" fill="#9ab0c8" font-size="10" font-family="system-ui,sans-serif">Vorzeigeprojekt</text>
+        </g>
+      </svg>
+      <div id="map-tooltip"><div id="tt-title"></div><div id="tt-loc"></div><div id="tt-cat"></div></div>
+    </div>
   </div>
 </section>
 <section class="projects-section">
@@ -164,8 +195,7 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
-      <div class="footer-brand">
-        <svg width="150" height="34" viewBox="0 0 170 38" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="16,1 7,19 13,19 4,37 22,14 16,14" fill="#22d353"/><text x="30" y="27" font-family="Inter,system-ui,sans-serif" font-weight="800" font-size="19" fill="#ffffff">STROM</text><text x="108" y="27" font-family="Inter,system-ui,sans-serif" font-weight="300" font-size="19" fill="#94a3b8" letter-spacing="1">WERK</text></svg>
+      <div class="footer-brand"><img src="logos/stromwerk-logo-white.png" height="40" alt="STROMWERK" style="display:block">
         <p>Schlüsselfertige Photovoltaik- und Elektroinstallationen in ganz Österreich.</p>
       </div>
       <div class="footer-col"><h5>Navigation</h5><ul><li><a href="index.html">Startseite</a></li><li><a href="leistungen.html">Leistungen</a></li><li><a href="referenzen.html">Referenzen</a></li><li><a href="ueber-uns.html">Über uns</a></li><li><a href="kontakt.html">Kontakt</a></li></ul></div>
@@ -235,17 +265,35 @@ document.querySelectorAll('.filter-btn').forEach(function(btn){
   });
 });
 (function(){
-  if(typeof L==='undefined'){return;}
-  var map=L.map('ref-map',{center:[47.7,14.2],zoom:7,scrollWheelZoom:false});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
-  var pin=L.divIcon({className:'',html:'<div class="map-pin"></div>',iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-10]});
-  PROJECTS.forEach(function(p){
-    var lbl=p.cat==='shell'?'Shell Tankstelle':'Gewerbe & Industrie';
-    L.marker([p.lat,p.lng],{icon:pin}).addTo(map).bindPopup('<strong>'+p.title+'</strong><span>'+p.location+'</span><span class="pop-cat '+p.cat+'">'+lbl+'</span>');
+  var container=document.getElementById('ref-map');
+  var tooltip=document.getElementById('map-tooltip');
+  if(!container||!tooltip)return;
+  container.querySelectorAll('.dot-group').forEach(function(g){
+    var idx=parseInt(g.dataset.idx);
+    var p=PROJECTS[idx];
+    var catLabel=p.cat==='shell'?'Shell Tankstelle':'Gewerbe & Industrie';
+    g.addEventListener('mouseenter',function(e){
+      document.getElementById('tt-title').textContent=p.title;
+      document.getElementById('tt-loc').textContent=p.location;
+      var cat=document.getElementById('tt-cat');
+      cat.textContent=catLabel;
+      cat.className=p.cat;
+      tooltip.style.display='block';
+      moveTooltip(e);
+    });
+    g.addEventListener('mousemove',moveTooltip);
+    g.addEventListener('mouseleave',function(){tooltip.style.display='none';});
+    g.addEventListener('click',function(){openLightbox(idx);});
   });
-  map.on('click',function(){map.scrollWheelZoom.enable();});
-  map.on('mouseout',function(){map.scrollWheelZoom.disable();});
-  setTimeout(function(){map.invalidateSize();},100);
+  function moveTooltip(e){
+    var rect=container.getBoundingClientRect();
+    var x=e.clientX-rect.left+14;
+    var y=e.clientY-rect.top-50;
+    if(x+185>rect.width)x=e.clientX-rect.left-200;
+    if(y<8)y=e.clientY-rect.top+16;
+    tooltip.style.left=x+'px';
+    tooltip.style.top=y+'px';
+  }
 })();
 var lbIdx=0,lbImgs=[];
 function openLightbox(idx){
